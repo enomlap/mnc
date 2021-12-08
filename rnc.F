@@ -1,0 +1,89 @@
+! =============================================================================
+! zuo,Nov 15, 2014
+! by ncgen.clj
+! PURPERSE:
+! CHANGE GLOBAL ATTRIBUTE OF 'A_NAME' WITH TYPE OF 'A_TYPE' TO NEW VALUE 'A_VALUE'
+! $0 FILE.NC A_NAME A_TYPE A_VALUE
+! 
+! Makefile
+! -----------------------------------------------------------------------------
+! # zuo,Feb 07, 2017
+! # Makefile
+! 
+! FFLAGS=-debug all -g -I/public/software/wrf/netcdf-3.6.3-intel/include/ -c  
+! LDFLAGS=-debug all -g -L/public/software/wrf/netcdf-3.6.3-intel/lib -lnetcdf
+! all:rnc.exe
+! 
+! rnc.exe:rnc.o
+! 	ifort $< -o $@ $(LDFLAGS)
+! 	#ifort $< -o $@ -L/public/software/wrf/netcdf-3.6.3-intel/lib -lnetcdf
+! rnc.o:rnc.F90
+! 	ifort $(FFLAGS) $< -o $@
+! 
+! .PHONY:clean
+! clean:
+! 	rm -f rnc.o rnc.exe
+! 
+! =============================================================================
+PROGRAM CHANGE_GLOBAL_ATTR
+  USE NETCDF
+  IMPLICIT NONE
+  INTEGER::NCID
+  CHARACTER(LEN=256)::ATT_NAME,SV
+  REAL::RV
+  DOUBLE PRECISION::DV
+  INTEGER::IV
+! IV,DV,RV,SV: INTEGER_VALUE,DOUBLE_VALUE,REAL AND STRING
+  IV=IARGC()
+  IF(IV.NE. 4)THEN
+    PRINT*,"WRONG PARAMETERS,EXPECT 4 BUT GOT ",IV
+    PRINT*,"USAGE EXAMPLE:"
+    PRINT*,'$0 SOME.NC "AUTHOR:" INT|STRING|REAL|DOUBLE "YOU&ME"|37.333 '
+    PRINT*,'RNC.EXE /PUBLIC/HOME/Z/CMAQ/DATA/MCIP3/YC03/GRID_CRO_2D_2016361.NCF XORIG DOUBLE 1000.0002'
+    CALL EXIT(0)
+  ENDIF
+  CALL GETARG(1,ATT_NAME)! NC FILE NAME
+! CALL CHECK(NF90_OPEN(TRIM("/PUBLIC/HOME/Z/CMAQ/DATA/MCIP3/YC03/GRID_CRO_2D_2016361.NCF"),NF90_WRITE,NCID),24)
+  CALL CHECK(NF90_OPEN(TRIM(ATT_NAME),NF90_WRITE,NCID),25)
+  CALL GETARG(3,ATT_NAME)! TYPE
+  IF('INT'==ATT_NAME(1:3))THEN
+  ELSEIF('REA'==ATT_NAME(1:3))THEN
+    CALL GETARG(2,ATT_NAME)! NAME
+    CALL CHECK(NF90_GET_ATT(NCID,NF90_GLOBAL,TRIM(ATT_NAME),RV),37)
+    PRINT*,"OLD ",TRIM(ATT_NAME),"=",RV
+    CALL GETARG(4,SV)!VALUE IN STRING FORM
+    READ(SV,*)RV
+    PRINT*,"NEW ",TRIM(ATT_NAME),"=",RV
+    CALL CHECK(NF90_PUT_ATT(NCID,NF90_GLOBAL,ATT_NAME,RV),37)
+  ELSEIF('DOU'==ATT_NAME(1:3))THEN
+    CALL GETARG(2,ATT_NAME)! NAME
+    CALL CHECK(NF90_GET_ATT(NCID,NF90_GLOBAL,TRIM(ATT_NAME),DV),37)
+    PRINT*,"OLD ",TRIM(ATT_NAME),"=",DV
+    CALL GETARG(4,SV)!VALUE IN STRING FORM
+    READ(SV,*)DV
+    PRINT*,"NEW ",TRIM(ATT_NAME),"=",DV
+    CALL CHECK(NF90_PUT_ATT(NCID,NF90_GLOBAL,ATT_NAME,DV),37)
+  ELSEIF('STR'==ATT_NAME(1:3))THEN
+  ELSE
+    PRINT*,'THE TYPE SHOULD ONLY IN INT|STRING|REAL|DOUBLE WITH UPPERCASE AND ONLY THE FIRST 3 CHARACTER IS COUNT IN.'
+  END IF
+! CALL CHECK(NF90_GET_ATT(NCID, NF90_GLOBAL, TRIM(ATT_NAME),  _V),70)
+! PRINT*,"BEFORE:",TRIM(ATT_NAME),"=",DOUBLE_V
+! CALL CHECK(NF90_PUT_ATT(NCID, NF90_GLOBAL, TRIM(ATT_NAME),  100.001),72)
+! PRINT*,"AFTER:",TRIM(ATT_NAME),"=",DOUBLE_V
+  CALL CHECK(NF90_CLOSE(NCID),74)
+  CONTAINS
+    SUBROUTINE CHECK(STATUS,LINE)
+      INTEGER,INTENT(IN)::STATUS,LINE
+      IF(STATUS/=NF90_NOERR)THEN
+        PRINT*,TRIM(NF90_STRERROR(STATUS))," AT LINE:",LINE
+        STOP 2
+      END IF
+    END SUBROUTINE CHECK
+END PROGRAM
+! -------------------------------------------------------------------
+! | THIS FILE IS REFORMATTED BY FMTFORTRAN.GAWK.VERSION:20161112    |
+! | FMTFORMAT.GAWK IS A GAWK SCRIPT WRITEN FOR REFORMATTING BAD     |
+! | STYLE FORTRAN 77 CODE,                                          |
+! | ORIGINAL BY ZUOHJ@CNOOC.COM.CN, PEKING,OCT.26,2007.             |
+! -------------------------------------------------------------------
