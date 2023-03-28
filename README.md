@@ -8,10 +8,11 @@ So, I rewrite this code to Fortran 77( or, you can change it to C).
 
 USAGE:
 /home/z/WRFV3/WRFOUT/rnc.exe /home/z/CMAQ/data/mcip3/YC03/MET_DOT_3D_2016361.ncf XORIG DOUBLE -252000.3125 ;
+
 /home/z/WRFV3/WRFOUT/rnc.exe /home/z/CMAQ/data/mcip3/YC03/MET_DOT_3D_2016361.ncf YORIG DOUBLE -1054777.5 ;
 
 ATTENTION:
-1,I just write the code for change REAL/DOUBLE PRECISION type, no other type is count in! I have no time to add it, I'll add them later if I have time, it's very easy.
-2,Change the 'Makefile' for your fortran compiler.
+1. I just write the code for change REAL/DOUBLE PRECISION type, no other type is count in! I have no time to add it, I'll add them later if I have time, it's very easy.
+2. Change the 'Makefile' for your fortran compiler.
 
 zuohj,Feb 23, 2017
